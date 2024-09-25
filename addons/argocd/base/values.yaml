@@ -1,0 +1,73 @@
+global:
+  revisionHistoryLimit: 5
+
+  priorityClassName: high-priority
+
+  logging:
+    format: json
+    level: info
+
+  networkPolicy:
+    create: true
+    defaultDenyIngress: true
+
+  nodeSelector:
+    deploy-group/addons: 'true'
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+
+configs:
+  cm:
+    users.anonymous.enabled: false
+    exec.shells: "bash,sh"
+    statusbadge.enabled: true
+    ui.bannerpermanent: true
+    kustomize.buildOptions: "--enable-helm --load-restrictor LoadRestrictionsNone"
+    application.resourceTrackingMethod: annotation
+    jsonnet.enabled: false
+    helm.enabled: false
+    application.links: |
+      - url: https://toolbox.192.168.200.200.nip.io/redirect?name={{.app.metadata.name}}&key=docs
+        title: Docs
+        icon.class: "fa-book"
+      - url: https://toolbox.192.168.200.200.nip.io/redirect?name={{.app.metadata.name}}&key=repo
+        title: Code Repository
+        icon.class: "fa-code"
+      - url: https://toolbox.192.168.200.200.nip.io/redirect?name={{.app.metadata.name}}&key=metrics
+        title: Metrics
+        icon.class: "fa-circle-nodes"
+      - url: https://toolbox.192.168.200.200.nip.io/redirect?name={{.app.metadata.name}}&key=logs
+        title: Logs
+        icon.class: "fa-bars"
+      - url: https://toolbox.192.168.200.200.nip.io/redirect?name={{.app.metadata.name}}&key=url
+        title: Application URL
+        icon.class: "fa-user-secret"
+  rbac:
+    policy.matchMode: "glob" # options: `glob` or `regex`
+    policy.default: 'role:none'
+  params:
+    server.insecure: true
+    applicationsetcontroller.enable.progressive.syncs: false
+    controller.status.processors: 50
+    controller.operation.processors: 25
+    #reposerver.max.combined.directory.manifests.size: '3M'
+  secret:
+    createSecret: false
+  gpg:
+    keys: {}
+
+applicationSet:
+  podAnnotations:
+    fluentbit.io/exclude: "true"
+controller:
+  podAnnotations:
+    fluentbit.io/exclude: "true"
+repoServer:
+  podAnnotations:
+    fluentbit.io/exclude: "true"

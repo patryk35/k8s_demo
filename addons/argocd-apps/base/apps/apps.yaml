@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements: []
+          - git:
+              repoURL: '{{ .projectAppsAppsRepo }}'
+              revision: '{{ .projectAppsAppsBranch }}'
+              directories:
+                - path: '*/envs/{{ .envName }}'
+  template:
+    spec:
+      project: 'siriusopt{{ .argoResourceNameSuffix }}'
+      source:
+        repoURL: '{{ .projectAppsAppsRepo }}'
+        targetRevision: '{{ .projectAppsAppsBranch }}'
+        path: '{{ .path.path }}'
+  templatePatch: |
+    spec:
+      # This entry does not affect configuration. Used to avoid setting empty `spec:` block causing ApplicationSet errors
+      plugin: {}
+    {{- if eq .projectAppsAppsAutoSync "true" }}
+      syncPolicy:
+        automated:
+          prune: {{ .projectAppsAppsAutoSyncPrune }}
+          selfHeal: true
+          allowEmpty: false # protection when there are no target resources
+    {{- end }}

@@ -1,0 +1,30 @@
+global:
+  domain: argocd.192.168.200.200.nip.io
+configs:
+  cm:
+    ui.bannercontent: "SiriusOPT Local"
+    oidc.config: |
+      name: Auth0
+      issuer: https://test-siriusopt.eu.auth0.com/
+      clientID: $oidc.auth0.clientID
+      clientSecret: $oidc.auth0.clientSecret
+      requestedScopes:
+      - openid
+      - profile
+      - email
+  rbac:
+    policy.csv: |
+      g, pat35@op.pl, role:admin
+    scopes: '[email]'
+notifications:
+  subscriptions:
+    - recipients:
+        - slack:argocd-local-alerts
+      triggers:
+        - on-sync-succeeded
+        - on-sync-status-unknown
+        - on-out-of-sync
+        - on-sync-failed
+        - on-health-degraded
+
+

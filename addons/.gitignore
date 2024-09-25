@@ -1,0 +1,7 @@
+*.local
+*.tmp
+charts
+!charts/addons-defaults
+secrets/local
+local.env
+.secrets

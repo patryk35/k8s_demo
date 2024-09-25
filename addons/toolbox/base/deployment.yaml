@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toolbox-server
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/instance: toolbox
+    app.kubernetes.io/name: toolbox-server
+    app.kubernetes.io/version: v0.0.1 # TODO
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: toolbox
+      app.kubernetes.io/name: toolbox-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: server
+        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/instance: toolbox
+        app.kubernetes.io/name: toolbox-server
+        app.kubernetes.io/version: v0.0.4 # TODO
+    spec:
+      volumes:
+        - name: configuration
+          configMap:
+            name: toolbox-server
+            defaultMode: 420
+            optional: false
+      containers:
+        - name: server
+          image: milewskipatryk/api-toolbox:v0.0.4
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 32m
+              memory: 64Mi
+          volumeMounts:
+            - name: configuration
+              mountPath: /code/configs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+#          terminationMessagePath: /dev/termination-log
+#          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+      priorityClassName: low-priority
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 15
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        deploy-group/addons: 'true'
+      automountServiceAccountToken: false
+#      affinity:
+#        podAntiAffinity:
+#          preferredDuringSchedulingIgnoredDuringExecution:
+#            - weight: 100
+#              podAffinityTerm:
+#                labelSelector:
+#                  matchLabels:
+#                    app.kubernetes.io/name: toolbox-server
+#                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: toolbox
+              app.kubernetes.io/name: toolbox-server
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: toolbox
+              app.kubernetes.io/name: toolbox-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 0%
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 300

@@ -1,0 +1,18 @@
+# TODO: endpoint access secure
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault-ui
+  namespace: vault
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: KUSTOMIZED
+      priority: 10
+      services:
+        - name: vault-ui
+          port: 8200
+#  tls:
+#    certResolver: default

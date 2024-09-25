@@ -1,0 +1,67 @@
+global:
+  nodeSelector:
+    deploy-group/addons: 'true'
+
+revisionHistoryLimit: 5
+priorityClassName: high-priority
+processPushSecret: false
+extendedMetricLabels: true
+
+crds:
+  createPushSecret: false
+
+serviceMonitor:
+  enabled: true
+  additionalLabels:
+    prometheus: prometheus-operator
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    #    cpu: 100m
+    memory: 128Mi
+
+replicaCount: 2
+leaderElect: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 50%
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/instance: external-secrets
+        app.kubernetes.io/name: external-secrets
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/instance: external-secrets
+        app.kubernetes.io/name: external-secrets
+
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      #    cpu: 100m
+      memory: 64Mi
+
+certController:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      #    cpu: 100m
+      memory: 64Mi

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/resources
+  - resources/cluster-secret-store.yaml
+
+helmCharts:
+  - name: external-secrets
+    includeCRDs: true
+    valuesFile: ../../base/values.yaml
+    additionalValuesFiles:
+      - values.yaml
+    releaseName: external-secrets
+    namespace: external-secrets
+    version: "v0.10.0"
+    repo: https://charts.external-secrets.io
+    valuesMerge: override
+    apiVersions:
+      - monitoring.coreos.com/v1

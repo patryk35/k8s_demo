@@ -1,0 +1,8 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-priority
+value: 1000000
+globalDefault: false
+preemptionPolicy: Never
+description: "This priority class is reserved only for workloads critical to the operation of the cluster"

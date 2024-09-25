@@ -1,0 +1,4 @@
+#TODO
+ha:
+  enabled: false
+  replicas: 1

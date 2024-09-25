@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: toolbox-server
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/instance: toolbox
+    app.kubernetes.io/name: toolbox-server
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/instance: toolbox
+    app.kubernetes.io/name: toolbox-server
+  type: ClusterIP
+

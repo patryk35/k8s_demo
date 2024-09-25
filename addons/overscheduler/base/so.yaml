@@ -1,0 +1,24 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: cron-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: my-deployment
+  minReplicaCount: 0
+  cooldownPeriod: 300
+  triggers:
+    - type: cron
+      metadata:
+        timezone: Europe/Warsaw
+        start: 0 6 * * *
+        end: 0 20 * * *
+        desiredReplicas: "10"
+#    - type: node-count
+#      metadata:
+#        podSelector: 'app=backend' # -> some daemonset (like in proportional autoscaler)
+#        value: '0.5'
+#  - type: external
+#    metadata:
+#      scalerAddress: toolbox-server.toolbox:8080/some-scaler

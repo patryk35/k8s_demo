@@ -1,0 +1,20 @@
+global:
+  psa:
+    policy: restricted
+
+namespace:
+  create: true
+
+psa:
+  enforce:
+    policy:
+  audit:
+    policy:
+  warn:
+    policy:
+
+networkPolicy:
+  blockAll:
+    create: true
+  allowClusterDNS:
+    create: true

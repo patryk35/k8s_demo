@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: meaningless-placeholder
+spec:
+  goTemplate: true
+
+  syncPolicy:
+    # Prevent an Application's child resources from being deleted, when the parent Application is deleted
+    # DO NOT CHANGE IT
+    preserveResourcesOnDeletion:  true
+  template:
+    metadata:
+      name: '{{normalize (index .path.segments 0)}}{{ .argoResourceNameSuffix }}'
+      annotations:
+        argocd.argoproj.io/compare-options: IncludeMutationWebhook=true,ServerSideDiff=true
+        argocd.argoproj.io/manifest-generate-paths: .
+    spec:
+      destination:
+        server: '{{ .server }}'
+      syncPolicy:
+        syncOptions:
+          - RespectIgnoreDifferences=true
+          - PruneLast=true
+          - ServerSideApply=true
+        retry:
+          limit: 8
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 15m
+      revisionHistoryLimit: 10

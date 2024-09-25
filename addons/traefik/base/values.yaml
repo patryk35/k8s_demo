@@ -1,0 +1,46 @@
+image:
+  tag: "v3.1.1"
+
+#service:
+#  type: NodePort
+
+nodeSelector:
+  deploy-group/apps: 'true'
+
+logs:
+  general:
+    # Alternative logging levels are DEBUG, PANIC, FATAL, ERROR, WARN, and INFO.
+    level: INFO
+  access:
+    enabled: true
+    format: json
+    ## Filtering https://docs.traefik.io/observability/access-logs/#filtering
+    #filters: {}
+    ## Fields
+    ## https://docs.traefik.io/observability/access-logs/#limiting-the-fieldsincluding-headers
+    fields:
+      general:
+        defaultmode: keep
+      headers:
+        defaultmode: keep
+
+metrics:
+  prometheus:
+    entryPoint: metrics
+    ## Enable metrics on entry points. Default=true
+    # addEntryPointsLabels: false
+    ## Enable metrics on routers. Default=false
+    # addRoutersLabels: true
+    ## Enable metrics on services. Default=true
+    # addServicesLabels: false
+    ## Buckets for latency metrics. Default="0.1,0.3,1.2,5.0"
+    # buckets: "0.5,1.0,2.5"
+    ## When manualRouting is true, it disables the default internal router in
+    ## order to allow creating a custom router for prometheus@internal service.
+    # manualRouting: true
+
+ports:
+  web:
+    redirectTo:
+      port: websecure
+

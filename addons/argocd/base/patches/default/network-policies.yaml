@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: server
+      from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+    - ports:
+        - protocol: TCP
+          port: metrics
+      from:
+        - namespaceSelector: {}

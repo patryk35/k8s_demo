@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements: []
+          - git:
+              repoURL: '{{ .argocdAppsRepo }}'
+              revision: '{{ .argocdAppsBranch }}'
+              directories:
+                - path: 'argocd*/envs/{{ .envName }}'
+  template:
+    spec:
+      project: 'argocd{{ .argoResourceNameSuffix }}'
+      source:
+        repoURL: '{{ .argocdAppsRepo }}'
+        targetRevision: '{{ .argocdAppsBranch }}'
+        path: '{{ .path.path }}'
+  templatePatch: |
+    spec:
+      # This entry does not affect configuration. Used to avoid setting empty `spec:` block causing ApplicationSet errors
+      plugin: {} 
+    {{- if eq .argocdAppsAutoSync "true" }}
+      syncPolicy:
+        automated:
+          prune: {{ .argocdAppsAutoSyncPrune }}
+          selfHeal: true
+          allowEmpty: false # protection when there are no target resources
+    {{- end }}
+    {{- if eq "argocd" (index .path.segments 0) }}
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas
+    {{- end }}

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - path: network-policies.yaml
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: argocd-cm
+      fieldPath: data.url
+      options:
+        delimiter: "/"
+        index: 2
+        create: false
+    targets:
+      - select:
+          kind: IngressRoute
+          name: argocd-server
+        fieldPaths:
+          - spec.routes.*.match
+        options:
+          delimiter: "`"
+          index: 1
+          create: false

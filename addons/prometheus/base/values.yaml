@@ -1,0 +1,25 @@
+global:
+  rbac:
+    pspEnabled: false
+
+nameOverride: ""
+
+kube-state-metrics:
+  podSecurityPolicy:
+    enabled: false
+
+grafana:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+prometheus:
+  prometheusSpec:
+#    serviceMonitorSelectorNilUsesHelmValues: true
+    serviceMonitorSelector:
+      matchLabels:
+        prometheus: prometheus-operator
+
+# TODO nodeSelector: {}
+# TODO: presistent volumes

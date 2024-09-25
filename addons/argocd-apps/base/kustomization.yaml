@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+
+resources:
+  - projects/argocd.yaml
+  - projects/addons.yaml
+  - projects/apps.yaml
+  - apps/argocd.yaml
+  - apps/addons.yaml
+  - apps/apps.yaml
+
+patches:
+  - path: apps/default-patch.yaml
+    target:
+      group: argoproj.io
+      version: v1alpha1
+      kind: ApplicationSet
+
+
+
+
+

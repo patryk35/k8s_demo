@@ -1,0 +1,12 @@
+server:
+  extensions:
+    enabled: true
+
+    extensionList:
+      # https://github.com/argoproj-labs/rollout-extension
+      - name: rollout-extension
+        env:
+          - name: EXTENSION_URL
+            value: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.3.5/extension.tar
+          - name: MAX_DOWNLOAD_SEC
+            value: '180'

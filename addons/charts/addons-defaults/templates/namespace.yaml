@@ -1,0 +1,13 @@
+{{- if .Values.namespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include  "addons-defaults.namespace" . }}
+  labels:
+    pod-security.kubernetes.io/enforce: {{ .Values.psa.enforce.policy  | default .Values.global.psa.policy }}
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: {{ .Values.psa.audit.policy  | default .Values.global.psa.policy }}
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: {{ .Values.psa.warn.policy  | default .Values.global.psa.policy }}
+    pod-security.kubernetes.io/warn-version: latest
+{{- end }}

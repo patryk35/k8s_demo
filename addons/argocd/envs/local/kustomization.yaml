@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+
+resources:
+  - ../../base/resources
+
+helmGlobals:
+  chartHome: ../../../charts
+
+helmCharts:
+  - name: argo-cd
+    releaseName: argocd
+    namespace: argocd
+    version: "7.4.4"
+    repo: https://argoproj.github.io/argo-helm
+    includeCRDs: true
+    valuesFile: ../../base/values.yaml
+    additionalValuesFiles:
+      - ../../base/variants/values.notifications.yaml
+      - ../../base/variants/values.metrics.service-monitor.yaml
+      - ../../base/variants/values.extensions.yaml
+      - ../../base/variants/values.non-prod.yaml
+      - ../../base/variants/values.develop.yaml
+      - values.yaml
+    valuesMerge: override
+    apiVersions:
+      - monitoring.coreos.com/v1
+      - policy/v1
+  - releaseName: addons-defaults
+    namespace: argocd
+    name: addons-defaults
+
+components:
+  - ../../base/patches/default
+
+
+

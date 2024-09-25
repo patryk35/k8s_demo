@@ -1,0 +1,42 @@
+controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator
+redis:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator
+server:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator
+repoServer:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator
+applicationSet:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator
+notifications:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      selector:
+        prometheus: prometheus-operator

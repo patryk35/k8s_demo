@@ -1,0 +1,69 @@
+version: '3'
+
+tasks:
+
+  deploy-all:
+    cmds:
+      - task: deploy-base-addons
+      - task: deploy-additional-addons
+
+  deploy-vault:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/vault/envs/local | kubectl apply --force -f-
+      - bash tasks/scripts/init-vault.sh
+      - task: update-vault-secrets
+
+  remove-vault:
+    prompt: It will remove local vault from cluster. Do you want to continue?
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/vault/envs/local | kubectl delete -f-
+      - rm .vault.secrets || true
+      #- '[ -f "local.env" ] && cat local.env | grep -v LOCAL_VAULT > local.env || exit 0' # TODO: remove it
+
+  unseal-vault:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - bash tasks/scripts/unseal-vault.sh
+
+  update-vault-secrets:
+    dir: '{{.ROOT_DIR}}'
+    dotenv: ['.vault.secrets'] # needs to be reloaded, when is used as sub-step after generating values
+    cmds:
+      - bash tasks/scripts/update-vault-secrets.sh
+      - defer: kubectl exec -it -n vault vault-0 -- sh -c "rm -f /tmp/*.secret"
+
+  deploy-base-addons:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - task: clean-charts
+      - for: ['shared-namespaces', 'shared-priorityclasses']
+        cmd: kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/{{ .ITEM }}/envs/local | kubectl apply -f- --server-side=true
+      - for: ['prometheus', 'traefik', 'external-secrets']
+        cmd: kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/{{ .ITEM }}/envs/local | kubectl apply -f- --server-side=true || true
+      - sleep 30
+      - task: deploy-vault
+      - for: ['prometheus', 'traefik', 'external-secrets', 'argocd', 'argocd-apps']
+        cmd: kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/{{ .ITEM }}/envs/local | kubectl apply -f- --server-side=true
+
+  delete-base-addons:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - task: clean-charts
+      - for: ['argocd', 'argocd-apps', 'traefik', 'external-secrets', 'vault', 'prometheus', 'shared-namespaces', 'shared-priorityclasses']
+        cmd: kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/{{ .ITEM }}/envs/local | kubectl delete -f- || true
+
+  deploy-additional-addons:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - for: ['toolbox']
+        cmd: kustomize build --enable-helm --load-restrictor LoadRestrictionsNone addons/{{ .ITEM }}/envs/local | kubectl apply -f- --server-side=true
+
+  clean-charts:
+    desc: Remove temporary Helm Chart files created/downloaded by Kustomize
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - ls addons/*/envs/*/charts/ || true
+      - rm -rf  addons/*/envs/*/charts/*
+

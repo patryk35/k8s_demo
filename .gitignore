@@ -1,0 +1,8 @@
+*.local
+*.tmp
+addons/charts
+secrets/local
+local.env
+local.vault.env
+.secrets
+*.secrets

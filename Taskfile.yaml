@@ -1,0 +1,17 @@
+version: 3
+
+dotenv: ['.vault.secrets','.secrets', '.env']
+
+includes:
+  local:
+    taskfile: ./tasks/Local.yaml
+
+tasks:
+  # TODO
+  show-override-env-template:
+    cmds:
+      - cat .env | grep placeholder | sed 's/placeholder//g'
+  show-env:
+    desc: Show Taskfile env variables
+    cmds:
+      - env

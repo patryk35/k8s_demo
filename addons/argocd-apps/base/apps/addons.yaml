@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: addons
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements: []
+          - git:
+              repoURL: '{{ .addonsAppsRepo }}'
+              revision: '{{ .addonsAppsBranch }}'
+              directories:
+                - path: '*/envs/{{ .envName }}'
+                - path: 'argocd*/envs/{{ .envName }}'
+                  exclude: true
+  template:
+    spec:
+      project: 'addons{{ .argoResourceNameSuffix }}'
+      source:
+        repoURL: '{{ .addonsAppsRepo }}'
+        targetRevision: '{{ .addonsAppsBranch }}'
+        path: '{{ .path.path }}'
+  templatePatch: |
+    spec:
+      # This entry does not affect configuration. Used to avoid setting empty `spec:` block causing ApplicationSet errors
+      plugin: {}
+#    {{- if eq .addonsAppsAutoSync "true" }}
+#      syncPolicy:
+#        automated:
+#          prune: {{ .addonsAppsAutoSyncPrune }}
+#          selfHeal: true
+#          allowEmpty: false # protection when there are no target resources
+#    {{- end }}
+# TODO: re-enable it

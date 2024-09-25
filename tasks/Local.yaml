@@ -1,0 +1,28 @@
+version: 3
+
+env:
+  KUBECONFIG: '{{default "{{.HOME}}/.kube/config" .LOCAL_KUBECONFIG}}'
+
+includes:
+  cluster:
+    taskfile: ./LocalCluster.yaml
+  run:
+    taskfile: ./LocalRun.yaml
+#  utils:
+#    taskfile: ./LocalUtils.yaml
+
+tasks:
+  init:
+    desc: Install minikube in specified version, create local cluster and deploy all apps
+    cmds:
+      - task: cluster:init
+      - task: run:deploy-all
+  start:
+    desc: Start existing local cluster
+    cmds:
+      - task: cluster:start
+      - task: run:unseal-vault
+  stop:
+    desc: Stop existing local cluster
+    cmds:
+      - task: cluster:stop

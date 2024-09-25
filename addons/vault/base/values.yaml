@@ -1,0 +1,13 @@
+#TODO
+
+server:
+  nodeSelector:
+    deploy-group/addons: 'true'
+injector:
+  nodeSelector:
+    deploy-group/addons: 'true'
+csi:
+  nodeSelector:
+    deploy-group/addons: 'true'
+ui:
+  enabled: true

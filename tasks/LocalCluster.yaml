@@ -1,0 +1,42 @@
+version: '3'
+
+tasks:
+
+  init:
+    cmds:
+      - task: install
+      - task: start
+
+  install:
+    # TODO: skip installation if already done (LOCAL_MINIKUBE_VERSION)
+    cmds:
+      - curl -LO https://storage.googleapis.com/minikube/releases/${LOCAL_MINIKUBE_VERSION}/minikube-linux-${LOCAL_CPU_ARCH}
+      - sudo install minikube-linux-${LOCAL_CPU_ARCH} /usr/local/bin/minikube
+      - defer: rm -f minikube-linux-${LOCAL_CPU_ARCH}
+
+  start:
+    cmds:
+      - minikube start --kubernetes-version=$LOCAL_K8S_VERSION $LOCAL_MINIKUBE_CONFIGURATION --static-ip $LOCAL_CLUSTER_IP
+      - minikube kubectl -- get pod
+      - cat ${KUBECONFIG}
+      - task: configure
+
+  configure:
+    dir: '{{.ROOT_DIR}}'
+    cmds:
+      - bash tasks/scripts/configure-metallb.sh
+      - kubectl get nodes -o=jsonpath='{.items[0].metadata.name}' | xargs -I {} kubectl label nodes {} topology.kubernetes.io/zone='local-zone-A'
+      - kubectl get nodes -o=jsonpath='{.items[0].metadata.name}' | xargs -I {} kubectl label nodes {} deploy-group/addons='true'
+      - kubectl get nodes -o=jsonpath='{.items[0].metadata.name}' | xargs -I {} kubectl label nodes {} deploy-group/apps='true'
+      - kubectl get nodes -o=jsonpath='{.items[0].metadata.name}' | xargs -I {} kubectl label nodes {} env/name=local
+      - kubectl get nodes -o=jsonpath='{.items[0].metadata.name}' | xargs -I {} kubectl label nodes {} env/type=development
+
+  stop:
+    cmds:
+      - minikube stop
+
+  delete:
+    prompt: It will remove local cluster. Do you want to continue?
+    cmds:
+      - minikube stop
+      - minikube delete
